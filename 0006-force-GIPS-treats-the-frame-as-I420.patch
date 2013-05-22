@@ -1,0 +1,39 @@
+From 691aadd0a24fcb0afd1c567827979fc5feb849b8 Mon Sep 17 00:00:00 2001
+From: slee <slee@mozilla.com>
+Date: Wed, 22 May 2013 10:29:44 +0800
+Subject: [PATCH 6/9] force GIPS treats the frame as I420
+
+---
+ dom/camera/GonkCameraControl.cpp                          | 2 +-
+ media/webrtc/signaling/src/media-conduit/VideoConduit.cpp | 2 ++
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/dom/camera/GonkCameraControl.cpp b/dom/camera/GonkCameraControl.cpp
+index 5758811..6272a8a 100644
+--- a/dom/camera/GonkCameraControl.cpp
++++ b/dom/camera/GonkCameraControl.cpp
+@@ -57,7 +57,7 @@ using namespace android;
+  * still returns the frame data in 'yuv420sp' anyway.  So for now, since
+  * everyone seems to return this format, we just force it.
+  */
+-#define FORCE_PREVIEW_FORMAT_YUV420SP   1
++#define FORCE_PREVIEW_FORMAT_YUV420SP   0
+ 
+ #define RETURN_IF_NO_CAMERA_HW()                                          \
+   do {                                                                    \
+diff --git a/media/webrtc/signaling/src/media-conduit/VideoConduit.cpp b/media/webrtc/signaling/src/media-conduit/VideoConduit.cpp
+index 471854c..a89b096 100644
+--- a/media/webrtc/signaling/src/media-conduit/VideoConduit.cpp
++++ b/media/webrtc/signaling/src/media-conduit/VideoConduit.cpp
+@@ -574,6 +574,8 @@ WebrtcVideoConduit::SendVideoFrame(unsigned char* video_frame,
+       MOZ_ASSERT(PR_FALSE);
+       return kMediaConduitMalformedArgument;
+   }
++
++  type = webrtc::kVideoI420;
+   //Transmission should be enabled before we insert any frames.
+   if(!mEngineTransmitting)
+   {
+-- 
+1.7.12.4 (Apple Git-37)
+

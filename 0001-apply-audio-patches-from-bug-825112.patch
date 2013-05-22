@@ -1,0 +1,92 @@
+From 9d5a45d6245a75dd58039ecfcb4a97060955e790 Mon Sep 17 00:00:00 2001
+From: slee <slee@mozilla.com>
+Date: Wed, 22 May 2013 10:16:01 +0800
+Subject: [PATCH 1/9] apply audio patches from bug 825112
+
+---
+ content/media/webrtc/Makefile.in                | 6 ++++++
+ content/media/webrtc/MediaEngineWebRTC.cpp      | 7 +++++++
+ content/media/webrtc/MediaEngineWebRTCAudio.cpp | 8 ++++++++
+ 3 files changed, 21 insertions(+)
+
+diff --git a/content/media/webrtc/Makefile.in b/content/media/webrtc/Makefile.in
+index a72fe8f..6dc816f 100644
+--- a/content/media/webrtc/Makefile.in
++++ b/content/media/webrtc/Makefile.in
+@@ -18,6 +18,7 @@ CPPSRCS	= \
+ 
+ ifdef MOZ_WEBRTC
+ CPPSRCS += \
++  AudioDeviceGonk.cpp \
+   MediaEngineWebRTC.cpp \
+   MediaEngineWebRTCVideo.cpp \
+   MediaEngineWebRTCAudio.cpp \
+@@ -35,7 +36,12 @@ include $(topsrcdir)/ipc/chromium/chromium-config.mk
+ 
+ ifdef MOZ_WEBRTC
+ LOCAL_INCLUDES += \
++  -I$(topsrcdir)/xpcom/glue \
++  -I$(topsrcdir)/media/webrtc/trunk \
+   -I$(topsrcdir)/media/webrtc/trunk/webrtc \
++  -I$(topsrcdir)/media/webrtc/trunk/webrtc/system_wrappers/interface \
++  -I$(topsrcdir)/media/webrtc/trunk/webrtc/modules/audio_device \
++  -I$(topsrcdir)/media/webrtc/trunk/webrtc/modules/audio_device/include \
+   -I$(topsrcdir)/media/webrtc/signaling/src/common \
+   -I$(topsrcdir)/media/webrtc/signaling/src/common/browser_logging \
+   -I$(topsrcdir)/dom/base \
+diff --git a/content/media/webrtc/MediaEngineWebRTC.cpp b/content/media/webrtc/MediaEngineWebRTC.cpp
+index ca20b92..5f483a8 100644
+--- a/content/media/webrtc/MediaEngineWebRTC.cpp
++++ b/content/media/webrtc/MediaEngineWebRTC.cpp
+@@ -32,6 +32,9 @@ GetUserMediaLog()
+ #ifdef MOZ_WIDGET_ANDROID
+ #include "AndroidBridge.h"
+ #endif
++#ifdef MOZ_WIDGET_GONK
++#include "AudioDeviceGonk.h"
++#endif
+ 
+ #undef LOG
+ #define LOG(args) PR_LOG(GetUserMediaLog(), PR_LOG_DEBUG, args)
+@@ -254,7 +257,11 @@ MediaEngineWebRTC::EnumerateAudioDevices(nsTArray<nsRefPtr<MediaEngineAudioSourc
+   }
+ 
+   if (!mAudioEngineInit) {
++#ifndef MOZ_WIDGET_GONK
+     if (ptrVoEBase->Init() < 0) {
++#else
++    if (ptrVoEBase->Init(webrtc::AudioDeviceGonk::Create(0, webrtc::AudioDeviceModule::kPlatformDefaultAudio)) < 0) {
++#endif
+       return;
+     }
+     mAudioEngineInit = true;
+diff --git a/content/media/webrtc/MediaEngineWebRTCAudio.cpp b/content/media/webrtc/MediaEngineWebRTCAudio.cpp
+index 715a8d4..e9439ed 100644
+--- a/content/media/webrtc/MediaEngineWebRTCAudio.cpp
++++ b/content/media/webrtc/MediaEngineWebRTCAudio.cpp
+@@ -3,6 +3,10 @@
+  * You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+ #include "MediaEngineWebRTC.h"
++#ifdef MOZ_WIDGET_GONK
++#include "audio_device.h"
++#include "AudioDeviceGonk.h"
++#endif
+ 
+ #define CHANNELS 1
+ #define ENCODING "L16"
+@@ -239,7 +243,11 @@ MediaEngineWebRTCAudioSource::Init()
+ {
+   mVoEBase = webrtc::VoEBase::GetInterface(mVoiceEngine);
+ 
++#ifdef MOZ_WIDGET_GONK
++  mVoEBase->Init(webrtc::AudioDeviceGonk::Create(0, webrtc::AudioDeviceModule::kPlatformDefaultAudio));
++#else
+   mVoEBase->Init();
++#endif
+ 
+   mVoERender = webrtc::VoEExternalMedia::GetInterface(mVoiceEngine);
+   if (!mVoERender) {
+-- 
+1.7.12.4 (Apple Git-37)
+

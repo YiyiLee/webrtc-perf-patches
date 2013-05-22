@@ -1,0 +1,59 @@
+From c711a909a540a998436b15e10c246d6e51a9e8a5 Mon Sep 17 00:00:00 2001
+From: slee <slee@mozilla.com>
+Date: Wed, 22 May 2013 10:31:33 +0800
+Subject: [PATCH 8/9] patches from bug 873003
+
+---
+ media/webrtc/signaling/src/mediapipeline/MediaPipeline.cpp | 8 ++++++++
+ media/webrtc/signaling/src/mediapipeline/MediaPipeline.h   | 6 +++++-
+ 2 files changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/media/webrtc/signaling/src/mediapipeline/MediaPipeline.cpp b/media/webrtc/signaling/src/mediapipeline/MediaPipeline.cpp
+index 80893ee..20d7838 100644
+--- a/media/webrtc/signaling/src/mediapipeline/MediaPipeline.cpp
++++ b/media/webrtc/signaling/src/mediapipeline/MediaPipeline.cpp
+@@ -790,9 +790,17 @@ void MediaPipelineTransmit::PipelineListener::ProcessVideoChunk(
+   layers::Image *img = chunk.mFrame.GetImage();
+   if (!img) {
+     // segment.AppendFrame() allows null images, which show up here as null
++    last_img_ = -1;
+     return;
+   }
+ 
++  // We get passed duplicate frames every ~10ms even if there's no frame change!
++  int32_t serial = img->GetSerial();
++  if (serial == last_img_) {
++    return;
++  }
++  last_img_ = serial;
++
+   ImageFormat format = img->GetFormat();
+ #ifdef MOZ_WIDGET_GONK
+   if (format == GONK_IO_SURFACE) {
+diff --git a/media/webrtc/signaling/src/mediapipeline/MediaPipeline.h b/media/webrtc/signaling/src/mediapipeline/MediaPipeline.h
+index f2450027..140742f 100644
+--- a/media/webrtc/signaling/src/mediapipeline/MediaPipeline.h
++++ b/media/webrtc/signaling/src/mediapipeline/MediaPipeline.h
+@@ -323,7 +323,9 @@ class MediaPipelineTransmit : public MediaPipeline {
+   class PipelineListener : public MediaStreamListener {
+    public:
+     PipelineListener(const RefPtr<MediaSessionConduit>& conduit)
+-      : conduit_(conduit), active_(false), samples_10ms_buffer_(nullptr),
++      : conduit_(conduit), active_(false),
++        last_img_(-1),
++        samples_10ms_buffer_(nullptr),
+         buffer_current_(0), samplenum_10ms_(0){}
+ 
+     ~PipelineListener()
+@@ -361,6 +363,8 @@ class MediaPipelineTransmit : public MediaPipeline {
+     RefPtr<MediaSessionConduit> conduit_;
+     volatile bool active_;
+ 
++    int32_t last_img_; // serial number of last Image
++
+     // These vars handle breaking audio samples into exact 10ms chunks:
+     // The buffer of 10ms audio samples that we will send once full
+     // (can be carried over from one call to another).
+-- 
+1.7.12.4 (Apple Git-37)
+

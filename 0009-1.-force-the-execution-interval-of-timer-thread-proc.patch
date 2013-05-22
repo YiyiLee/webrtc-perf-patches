@@ -1,0 +1,68 @@
+From 6310e0933f6eecae7d7ac0943b3186e6e852ddfa Mon Sep 17 00:00:00 2001
+From: slee <slee@mozilla.com>
+Date: Wed, 22 May 2013 10:33:59 +0800
+Subject: [PATCH 9/9] 1. force the execution interval of timer
+ thread(process_thread_impl) to 100 ms. 2. do not log in
+ TraceImpl::AddImpl 3. disable APMProcess in input and
+ output
+
+---
+ media/webrtc/trunk/webrtc/modules/utility/source/process_thread_impl.cc | 1 +
+ media/webrtc/trunk/webrtc/system_wrappers/source/trace_impl.cc          | 1 +
+ media/webrtc/trunk/webrtc/voice_engine/output_mixer.cc                  | 2 +-
+ media/webrtc/trunk/webrtc/voice_engine/transmit_mixer.cc                | 2 +-
+ 4 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/media/webrtc/trunk/webrtc/modules/utility/source/process_thread_impl.cc b/media/webrtc/trunk/webrtc/modules/utility/source/process_thread_impl.cc
+index 9028c44..a43682e 100644
+--- a/media/webrtc/trunk/webrtc/modules/utility/source/process_thread_impl.cc
++++ b/media/webrtc/trunk/webrtc/modules/utility/source/process_thread_impl.cc
+@@ -160,6 +160,7 @@ bool ProcessThreadImpl::Process()
+ 
+     if(minTimeToNext > 0)
+     {
++        minTimeToNext = 100;
+         if(kEventError == _timeEvent.Wait(minTimeToNext))
+         {
+             return true;
+diff --git a/media/webrtc/trunk/webrtc/system_wrappers/source/trace_impl.cc b/media/webrtc/trunk/webrtc/system_wrappers/source/trace_impl.cc
+index 649eadf..17da2ab 100644
+--- a/media/webrtc/trunk/webrtc/system_wrappers/source/trace_impl.cc
++++ b/media/webrtc/trunk/webrtc/system_wrappers/source/trace_impl.cc
+@@ -567,6 +567,7 @@ void TraceImpl::WriteToFile() {
+ void TraceImpl::AddImpl(const TraceLevel level, const TraceModule module,
+                         const WebRtc_Word32 id,
+                         const char msg[WEBRTC_TRACE_MAX_MESSAGE_SIZE]) {
++  return;
+   if (TraceCheck(level)) {
+     char trace_message[WEBRTC_TRACE_MAX_MESSAGE_SIZE];
+     char* message_ptr = trace_message;
+diff --git a/media/webrtc/trunk/webrtc/voice_engine/output_mixer.cc b/media/webrtc/trunk/webrtc/voice_engine/output_mixer.cc
+index daf0d4a..95df83f 100644
+--- a/media/webrtc/trunk/webrtc/voice_engine/output_mixer.cc
++++ b/media/webrtc/trunk/webrtc/voice_engine/output_mixer.cc
+@@ -571,7 +571,7 @@ OutputMixer::DoOperationsOnCombinedSignal()
+ 
+     // --- Far-end Voice Quality Enhancement (AudioProcessing Module)
+ 
+-    APMAnalyzeReverseStream();
++   // APMAnalyzeReverseStream();
+ 
+     // --- External media processing
+ 
+diff --git a/media/webrtc/trunk/webrtc/voice_engine/transmit_mixer.cc b/media/webrtc/trunk/webrtc/voice_engine/transmit_mixer.cc
+index dfa9ee9..52cff0f 100644
+--- a/media/webrtc/trunk/webrtc/voice_engine/transmit_mixer.cc
++++ b/media/webrtc/trunk/webrtc/voice_engine/transmit_mixer.cc
+@@ -371,7 +371,7 @@ TransmitMixer::PrepareDemux(const void* audioSamples,
+     }
+ 
+     // --- Near-end Voice Quality Enhancement (APM) processing
+-    APMProcessStream(totalDelayMS, clockDrift, currentMicLevel);
++    //APMProcessStream(totalDelayMS, clockDrift, currentMicLevel);
+ 
+     if (swap_stereo_channels_ && stereo_codec_)
+       // Only bother swapping if we're using a stereo codec.
+-- 
+1.7.12.4 (Apple Git-37)
+

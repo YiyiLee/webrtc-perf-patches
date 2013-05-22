@@ -1,0 +1,101 @@
+From 8f0abbd6d96fc3da934e8541070748dc03a905dd Mon Sep 17 00:00:00 2001
+From: slee <slee@mozilla.com>
+Date: Wed, 22 May 2013 10:22:44 +0800
+Subject: [PATCH 3/9] 1. force the video resolution to 176x144 2. force the
+ fps to 15
+
+---
+ content/media/webrtc/MediaEngineDefault.cpp               | 2 ++
+ content/media/webrtc/MediaEngineWebRTCVideo.cpp           | 4 ++--
+ dom/camera/CameraPreviewMediaStream.h                     | 2 +-
+ dom/media/MediaManager.cpp                                | 2 +-
+ media/webrtc/signaling/src/media-conduit/VideoConduit.cpp | 3 ++-
+ media/webrtc/signaling/src/sipcc/core/gsm/gsm_sdp.c       | 4 ++--
+ 6 files changed, 10 insertions(+), 7 deletions(-)
+
+diff --git a/content/media/webrtc/MediaEngineDefault.cpp b/content/media/webrtc/MediaEngineDefault.cpp
+index dea9647..a0c4173 100644
+--- a/content/media/webrtc/MediaEngineDefault.cpp
++++ b/content/media/webrtc/MediaEngineDefault.cpp
+@@ -61,6 +61,8 @@ MediaEngineDefaultVideoSource::Allocate(const MediaEnginePrefs &aPrefs)
+   }
+ 
+   mOpts = aPrefs;
++  mOpts.mWidth = 176;
++  mOpts.mHeight = 144;
+   mState = kAllocated;
+   return NS_OK;
+ }
+diff --git a/content/media/webrtc/MediaEngineWebRTCVideo.cpp b/content/media/webrtc/MediaEngineWebRTCVideo.cpp
+index c038385..8161f55 100644
+--- a/content/media/webrtc/MediaEngineWebRTCVideo.cpp
++++ b/content/media/webrtc/MediaEngineWebRTCVideo.cpp
+@@ -157,8 +157,8 @@ void
+ MediaEngineWebRTCVideoSource::ChooseCapability(const MediaEnginePrefs &aPrefs)
+ {
+ #ifdef MOZ_B2G_CAMERA
+-  mCapability.width  = aPrefs.mWidth;
+-  mCapability.height = aPrefs.mHeight;
++  mCapability.width  = 176;//aPrefs.mWidth;
++  mCapability.height = 144;//aPrefs.mHeight;
+ #else
+   int num = mViECapture->NumberOfCapabilities(mUniqueId, KMaxUniqueIdLength);
+ 
+diff --git a/dom/camera/CameraPreviewMediaStream.h b/dom/camera/CameraPreviewMediaStream.h
+index 9dbff68..101096a 100644
+--- a/dom/camera/CameraPreviewMediaStream.h
++++ b/dom/camera/CameraPreviewMediaStream.h
+@@ -13,7 +13,7 @@ namespace mozilla {
+ 
+ class CameraPreviewFrameCallback {
+ public:
+-  virtual void OnNewFrame(const gfxIntSize& aIntrinsicSize, layers::Image* aImage);
++  virtual void OnNewFrame(const gfxIntSize& aIntrinsicSize, layers::Image* aImage) {};
+ };
+ 
+ /**
+diff --git a/dom/media/MediaManager.cpp b/dom/media/MediaManager.cpp
+index 13e7090..3cce3e4 100644
+--- a/dom/media/MediaManager.cpp
++++ b/dom/media/MediaManager.cpp
+@@ -1110,7 +1110,7 @@ MediaManager::GetUserMedia(bool aPrivileged, nsPIDOMWindow* aWindow,
+   }
+ #endif
+   // XXX No full support for picture in Desktop yet (needs proper UI)
+-  if (aPrivileged || fake) {
++  if (aPrivileged || fake || 1) { /* For this path, since B2G cannot prompt permission dialog before bug 853356 is landed.*/
+     mMediaThread->Dispatch(gUMRunnable, NS_DISPATCH_NORMAL);
+   } else {
+     // Ask for user permission, and dispatch runnable (or not) when a response
+diff --git a/media/webrtc/signaling/src/media-conduit/VideoConduit.cpp b/media/webrtc/signaling/src/media-conduit/VideoConduit.cpp
+index 69545a2..471854c 100644
+--- a/media/webrtc/signaling/src/media-conduit/VideoConduit.cpp
++++ b/media/webrtc/signaling/src/media-conduit/VideoConduit.cpp
+@@ -548,7 +548,8 @@ WebrtcVideoConduit::SendVideoFrame(unsigned char* video_frame,
+                                    VideoType video_type,
+                                    uint64_t capture_time)
+ {
+-
++  static int i = 0;
++  if (i++ % 2 != 1) return kMediaConduitNoError;
+   CSFLogDebug(logTag,  "%s ", __FUNCTION__);
+ 
+   //check for  the parameters sanity
+diff --git a/media/webrtc/signaling/src/sipcc/core/gsm/gsm_sdp.c b/media/webrtc/signaling/src/sipcc/core/gsm/gsm_sdp.c
+index 7f32848..42f9ec3 100644
+--- a/media/webrtc/signaling/src/sipcc/core/gsm/gsm_sdp.c
++++ b/media/webrtc/signaling/src/sipcc/core/gsm/gsm_sdp.c
+@@ -3227,8 +3227,8 @@ gsmsdp_negotiate_codec (fsmdef_dcb_t *dcb_p, cc_sdp_t *sdp_p,
+                        if present */
+                     switch (codec) {
+                         case RTP_VP8:
+-                            payload_info->video.width = 640;
+-                            payload_info->video.height = 480;
++                            payload_info->video.width = 176;
++                            payload_info->video.height = 144;
+                         break;
+                         case RTP_I420:
+                             payload_info->video.width = 176;
+-- 
+1.7.12.4 (Apple Git-37)
+

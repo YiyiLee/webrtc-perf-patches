@@ -1,0 +1,25 @@
+From e5e7663f9b99b0cad5f5e172fa519f2264eea7f6 Mon Sep 17 00:00:00 2001
+From: slee <slee@mozilla.com>
+Date: Wed, 22 May 2013 10:31:05 +0800
+Subject: [PATCH 7/9] uses g711 audio codec
+
+---
+ media/webrtc/signaling/src/peerconnection/PeerConnectionCtx.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/media/webrtc/signaling/src/peerconnection/PeerConnectionCtx.cpp b/media/webrtc/signaling/src/peerconnection/PeerConnectionCtx.cpp
+index 9e7bb4e..3be1dec 100644
+--- a/media/webrtc/signaling/src/peerconnection/PeerConnectionCtx.cpp
++++ b/media/webrtc/signaling/src/peerconnection/PeerConnectionCtx.cpp
+@@ -189,7 +189,7 @@ nsresult PeerConnectionCtx::Initialize() {
+   // FIX - Get this list from MediaEngine instead
+   int codecMask = 0;
+   codecMask |= VCM_CODEC_RESOURCE_G711;
+-  codecMask |= VCM_CODEC_RESOURCE_OPUS;
++  //codecMask |= VCM_CODEC_RESOURCE_OPUS;
+   //codecMask |= VCM_CODEC_RESOURCE_LINEAR;
+   //codecMask |= VCM_CODEC_RESOURCE_G722;
+   //codecMask |= VCM_CODEC_RESOURCE_iLBC;
+-- 
+1.7.12.4 (Apple Git-37)
+

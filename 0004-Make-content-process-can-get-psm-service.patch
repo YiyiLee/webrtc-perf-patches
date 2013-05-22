@@ -1,0 +1,25 @@
+From 5fce9c60808fe8c90b7f1399468e222a2434d497 Mon Sep 17 00:00:00 2001
+From: slee <slee@mozilla.com>
+Date: Wed, 22 May 2013 10:27:45 +0800
+Subject: [PATCH 4/9] Make content process can get psm service
+
+---
+ security/manager/ssl/src/nsNSSComponent.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/security/manager/ssl/src/nsNSSComponent.cpp b/security/manager/ssl/src/nsNSSComponent.cpp
+index 79c9896..d68dfb4 100644
+--- a/security/manager/ssl/src/nsNSSComponent.cpp
++++ b/security/manager/ssl/src/nsNSSComponent.cpp
+@@ -266,7 +266,7 @@ bool EnsureNSSInitialized(EnsureNSSOperator op)
+ 
+   if (GeckoProcessType_Default != XRE_GetProcessType())
+   {
+-    if (op == nssEnsureOnChromeOnly)
++//    if (op == nssEnsureOnChromeOnly)
+     {
+       // If the component needs PSM/NSS initialized only on the chrome process,
+       // pretend we successfully initiated it but in reality we bypass it.
+-- 
+1.7.12.4 (Apple Git-37)
+
