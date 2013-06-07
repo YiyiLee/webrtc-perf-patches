@@ -1,7 +1,7 @@
-From 691aadd0a24fcb0afd1c567827979fc5feb849b8 Mon Sep 17 00:00:00 2001
+From daf2f3386d9df666f25e6dcdd55aa2f77603c234 Mon Sep 17 00:00:00 2001
 From: slee <slee@mozilla.com>
-Date: Wed, 22 May 2013 10:29:44 +0800
-Subject: [PATCH 6/9] force GIPS treats the frame as I420
+Date: Fri, 7 Jun 2013 11:54:54 +0800
+Subject: [PATCH 06/10] force-GIPS-treats-the-frame-as-I420
 
 ---
  dom/camera/GonkCameraControl.cpp                          | 2 +-

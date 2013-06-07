@@ -1,7 +1,7 @@
-From 5fce9c60808fe8c90b7f1399468e222a2434d497 Mon Sep 17 00:00:00 2001
+From 0e8e3b54e1976c7611e7bce120fd25a937b92dd0 Mon Sep 17 00:00:00 2001
 From: slee <slee@mozilla.com>
-Date: Wed, 22 May 2013 10:27:45 +0800
-Subject: [PATCH 4/9] Make content process can get psm service
+Date: Fri, 7 Jun 2013 11:50:17 +0800
+Subject: [PATCH 04/10] Make-content-process-can-get-psm-service
 
 ---
  security/manager/ssl/src/nsNSSComponent.cpp | 2 +-

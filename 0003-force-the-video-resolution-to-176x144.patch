@@ -1,17 +1,15 @@
-From 8f0abbd6d96fc3da934e8541070748dc03a905dd Mon Sep 17 00:00:00 2001
+From 75ea778de9b9f6bff65804eb67fc3b98d88397ed Mon Sep 17 00:00:00 2001
 From: slee <slee@mozilla.com>
-Date: Wed, 22 May 2013 10:22:44 +0800
-Subject: [PATCH 3/9] 1. force the video resolution to 176x144 2. force the
- fps to 15
+Date: Fri, 7 Jun 2013 11:49:07 +0800
+Subject: [PATCH 03/10] force-the-video-resolution-to-176x144
 
 ---
  content/media/webrtc/MediaEngineDefault.cpp               | 2 ++
  content/media/webrtc/MediaEngineWebRTCVideo.cpp           | 4 ++--
- dom/camera/CameraPreviewMediaStream.h                     | 2 +-
  dom/media/MediaManager.cpp                                | 2 +-
  media/webrtc/signaling/src/media-conduit/VideoConduit.cpp | 3 ++-
  media/webrtc/signaling/src/sipcc/core/gsm/gsm_sdp.c       | 4 ++--
- 6 files changed, 10 insertions(+), 7 deletions(-)
+ 5 files changed, 9 insertions(+), 6 deletions(-)
 
 diff --git a/content/media/webrtc/MediaEngineDefault.cpp b/content/media/webrtc/MediaEngineDefault.cpp
 index dea9647..a0c4173 100644
@@ -41,19 +39,6 @@ index c038385..8161f55 100644
  #else
    int num = mViECapture->NumberOfCapabilities(mUniqueId, KMaxUniqueIdLength);
  
-diff --git a/dom/camera/CameraPreviewMediaStream.h b/dom/camera/CameraPreviewMediaStream.h
-index 9dbff68..101096a 100644
---- a/dom/camera/CameraPreviewMediaStream.h
-+++ b/dom/camera/CameraPreviewMediaStream.h
-@@ -13,7 +13,7 @@ namespace mozilla {
- 
- class CameraPreviewFrameCallback {
- public:
--  virtual void OnNewFrame(const gfxIntSize& aIntrinsicSize, layers::Image* aImage);
-+  virtual void OnNewFrame(const gfxIntSize& aIntrinsicSize, layers::Image* aImage) {};
- };
- 
- /**
 diff --git a/dom/media/MediaManager.cpp b/dom/media/MediaManager.cpp
 index 13e7090..3cce3e4 100644
 --- a/dom/media/MediaManager.cpp
@@ -82,10 +67,10 @@ index 69545a2..471854c 100644
  
    //check for  the parameters sanity
 diff --git a/media/webrtc/signaling/src/sipcc/core/gsm/gsm_sdp.c b/media/webrtc/signaling/src/sipcc/core/gsm/gsm_sdp.c
-index 7f32848..42f9ec3 100644
+index f133920..3003fce 100644
 --- a/media/webrtc/signaling/src/sipcc/core/gsm/gsm_sdp.c
 +++ b/media/webrtc/signaling/src/sipcc/core/gsm/gsm_sdp.c
-@@ -3227,8 +3227,8 @@ gsmsdp_negotiate_codec (fsmdef_dcb_t *dcb_p, cc_sdp_t *sdp_p,
+@@ -3229,8 +3229,8 @@ gsmsdp_negotiate_codec (fsmdef_dcb_t *dcb_p, cc_sdp_t *sdp_p,
                         if present */
                      switch (codec) {
                          case RTP_VP8:

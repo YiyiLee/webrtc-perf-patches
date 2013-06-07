@@ -1,0 +1,86 @@
+From c34541920bc0d01c22fe4002d7f79a08796e6988 Mon Sep 17 00:00:00 2001
+From: slee <slee@mozilla.com>
+Date: Fri, 7 Jun 2013 12:02:40 +0800
+Subject: [PATCH 09/10] Run ProcessVideoChunk in another thread
+
+---
+ .../signaling/src/mediapipeline/MediaPipeline.cpp      | 12 +++++++++++-
+ .../webrtc/signaling/src/mediapipeline/MediaPipeline.h | 18 ++++++++++++++----
+ 2 files changed, 25 insertions(+), 5 deletions(-)
+
+diff --git a/media/webrtc/signaling/src/mediapipeline/MediaPipeline.cpp b/media/webrtc/signaling/src/mediapipeline/MediaPipeline.cpp
+index 1c9b5c6..1279cc0 100644
+--- a/media/webrtc/signaling/src/mediapipeline/MediaPipeline.cpp
++++ b/media/webrtc/signaling/src/mediapipeline/MediaPipeline.cpp
+@@ -834,6 +834,16 @@ void MediaPipelineTransmit::PipelineListener::ProcessVideoChunk(
+   }
+   last_img_ = serial;
+ 
++  RUN_ON_THREAD(worker_thread_, WrapRunnable(this,
++        &MediaPipelineTransmit::PipelineListener::ProcessVideoChunk_w,
++        RefPtr<VideoSessionConduit>(conduit), rate, (img)),
++        NS_DISPATCH_NORMAL);
++}
++
++void MediaPipelineTransmit::PipelineListener::ProcessVideoChunk_w(
++     const RefPtr<VideoSessionConduit>& conduit,
++     TrackRate rate,
++     layers::Image* img) {
+   ImageFormat format = img->GetFormat();
+ #ifdef MOZ_WIDGET_GONK
+   if (format == GONK_IO_SURFACE) {
+@@ -856,7 +866,7 @@ void MediaPipelineTransmit::PipelineListener::ProcessVideoChunk(
+     // Cast away constness b/c some of the accessors are non-const
+     layers::PlanarYCbCrImage* yuv =
+     const_cast<layers::PlanarYCbCrImage *>(
+-          static_cast<const layers::PlanarYCbCrImage *>(img));
++              static_cast<const layers::PlanarYCbCrImage *>(img));
+     // Big-time assumption here that this is all contiguous data coming
+     // from getUserMedia or other sources.
+     const layers::PlanarYCbCrImage::Data *data = yuv->GetData();
+diff --git a/media/webrtc/signaling/src/mediapipeline/MediaPipeline.h b/media/webrtc/signaling/src/mediapipeline/MediaPipeline.h
+index 52c3a31..4783526 100644
+--- a/media/webrtc/signaling/src/mediapipeline/MediaPipeline.h
++++ b/media/webrtc/signaling/src/mediapipeline/MediaPipeline.h
+@@ -325,8 +325,13 @@ class MediaPipelineTransmit : public MediaPipeline {
+         active_(false),
+         last_img_(-1),
+         samples_10ms_buffer_(nullptr),
+-        buffer_current_(0),
+-        samplenum_10ms_(0) {}
++        buffer_current_(0), samplenum_10ms_(0)
++    {
++          nsIThread *thread;
++          NS_NewNamedThread("Video Worker", &thread);
++          MOZ_ASSERT(thread);
++          worker_thread_ = thread;
++    }
+ 
+     ~PipelineListener()
+     {
+@@ -357,8 +362,12 @@ class MediaPipelineTransmit : public MediaPipeline {
+     virtual void ProcessAudioChunk(AudioSessionConduit *conduit,
+ 				   TrackRate rate, AudioChunk& chunk);
+ #ifdef MOZILLA_INTERNAL_API
+-    virtual void ProcessVideoChunk(VideoSessionConduit *conduit,
+-				   TrackRate rate, VideoChunk& chunk);
++        virtual void ProcessVideoChunk(VideoSessionConduit *conduit,
++            TrackRate rate, VideoChunk& chunk);
++    virtual void ProcessVideoChunk_w(
++                 const RefPtr<VideoSessionConduit>& conduit,
++                 TrackRate rate,
++                 layers::Image* image);
+ #endif
+     RefPtr<MediaSessionConduit> conduit_;
+     volatile bool active_;
+@@ -373,6 +382,7 @@ class MediaPipelineTransmit : public MediaPipeline {
+     int64_t buffer_current_;
+     // The number of samples in a 10ms audio chunk.
+     int64_t samplenum_10ms_;
++    RefPtr<nsIThread> worker_thread_;
+   };
+ 
+  private:
+-- 
+1.7.12.4 (Apple Git-37)
+

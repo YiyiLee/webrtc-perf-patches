@@ -1,10 +1,7 @@
-From 6310e0933f6eecae7d7ac0943b3186e6e852ddfa Mon Sep 17 00:00:00 2001
+From 6f89afa66e4127411524bdbc0f02b3aa27d10492 Mon Sep 17 00:00:00 2001
 From: slee <slee@mozilla.com>
-Date: Wed, 22 May 2013 10:33:59 +0800
-Subject: [PATCH 9/9] 1. force the execution interval of timer
- thread(process_thread_impl) to 100 ms. 2. do not log in
- TraceImpl::AddImpl 3. disable APMProcess in input and
- output
+Date: Fri, 7 Jun 2013 12:00:37 +0800
+Subject: [PATCH 08/10] -force-the-execution-interval-of-timer-thread-proc
 
 ---
  media/webrtc/trunk/webrtc/modules/utility/source/process_thread_impl.cc | 1 +

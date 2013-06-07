@@ -1,7 +1,7 @@
-From 1d6590a50cc065af968399e799cb216b626e377c Mon Sep 17 00:00:00 2001
+From af557888d99a0784a9a6c725e22cf7968d88b865 Mon Sep 17 00:00:00 2001
 From: slee <slee@mozilla.com>
-Date: Wed, 22 May 2013 10:28:33 +0800
-Subject: [PATCH 5/9] reduce the calling frequency of the timer thread
+Date: Fri, 7 Jun 2013 11:51:20 +0800
+Subject: [PATCH 05/10] reduce-the-calling-frequency-of-the-timer-thread
 
 ---
  .../video_coding/main/source/video_coding_impl.cc  | 30 ++++++++++++++--------

@@ -1,7 +1,7 @@
-From e5e7663f9b99b0cad5f5e172fa519f2264eea7f6 Mon Sep 17 00:00:00 2001
+From be69ff5e2f2a788d27a516fddc628401375aeaec Mon Sep 17 00:00:00 2001
 From: slee <slee@mozilla.com>
-Date: Wed, 22 May 2013 10:31:05 +0800
-Subject: [PATCH 7/9] uses g711 audio codec
+Date: Fri, 7 Jun 2013 11:57:17 +0800
+Subject: [PATCH 07/10] uses-g711-audio-codec
 
 ---
  media/webrtc/signaling/src/peerconnection/PeerConnectionCtx.cpp | 2 +-

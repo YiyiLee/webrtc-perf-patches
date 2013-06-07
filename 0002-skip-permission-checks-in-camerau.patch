@@ -1,8 +1,7 @@
-From af25cee25d09b02541b73558e23bbe39a3530eb0 Mon Sep 17 00:00:00 2001
+From 01d041b42b963bf91ca486d3b58ce37a8a32f6eb Mon Sep 17 00:00:00 2001
 From: slee <slee@mozilla.com>
-Date: Wed, 22 May 2013 10:21:45 +0800
-Subject: [PATCH 2/9] 1. skip permission checks in camera 2. fork content
- process as root
+Date: Fri, 7 Jun 2013 11:45:48 +0800
+Subject: [PATCH 02/10] skip-permission-checks-in-camerau
 
 ---
  dom/camera/DOMCameraManager.cpp             | 4 ++--
@@ -10,7 +9,7 @@ Subject: [PATCH 2/9] 1. skip permission checks in camera 2. fork content
  2 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/dom/camera/DOMCameraManager.cpp b/dom/camera/DOMCameraManager.cpp
-index 9e0a17f..9ab445d 100644
+index 15fbeb7..ab3f3d5 100644
 --- a/dom/camera/DOMCameraManager.cpp
 +++ b/dom/camera/DOMCameraManager.cpp
 @@ -81,11 +81,11 @@ nsDOMCameraManager::CheckPermissionAndCreateInstance(nsPIDOMWindow* aWindow)
