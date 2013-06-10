@@ -1,0 +1,68 @@
+From f94146a259a24a862a088c72e10971c8dd1fd029 Mon Sep 17 00:00:00 2001
+From: slee <slee@mozilla.com>
+Date: Fri, 7 Jun 2013 18:16:49 +0800
+Subject: [PATCH 10/10] Fix display problem
+
+---
+ gfx/layers/ipc/ShadowLayerUtilsGralloc.cpp                 | 8 ++++++--
+ media/webrtc/signaling/src/mediapipeline/MediaPipeline.cpp | 4 ++--
+ 2 files changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/gfx/layers/ipc/ShadowLayerUtilsGralloc.cpp b/gfx/layers/ipc/ShadowLayerUtilsGralloc.cpp
+index 9f94c26..773350c 100644
+--- a/gfx/layers/ipc/ShadowLayerUtilsGralloc.cpp
++++ b/gfx/layers/ipc/ShadowLayerUtilsGralloc.cpp
+@@ -24,6 +24,7 @@
+ #include "gfxPlatform.h"
+ 
+ #include "GeckoProfiler.h"
++#include <android/log.h>
+ 
+ using namespace android;
+ using namespace base;
+@@ -149,6 +150,7 @@ PixelFormatForImageFormat(gfxASurface::gfxImageFormat aFormat)
+ static size_t
+ BytesPerPixelForPixelFormat(android::PixelFormat aFormat)
+ {
++
+   switch (aFormat) {
+   case PIXEL_FORMAT_RGBA_8888:
+   case PIXEL_FORMAT_RGBX_8888:
+@@ -166,7 +168,9 @@ BytesPerPixelForPixelFormat(android::PixelFormat aFormat)
+   case PIXEL_FORMAT_RGB_332:
+     return 1;
+   default:
+-    MOZ_NOT_REACHED("Unknown gralloc pixel format");
++    __android_log_print(ANDROID_LOG_ERROR, "gecko", "\n\n\n\nBytesPerPixelForPixelFormat %x ", aFormat);
++    //MOZ_NOT_REACHED("Unknown gralloc pixel format");
++    return -1;
+   }
+   return gfxASurface::ImageFormatARGB32;
+ }
+@@ -242,7 +246,7 @@ GrallocBufferActor::Create(const gfxIntSize& aSize,
+     return actor;
+ 
+   size_t bpp = BytesPerPixelForPixelFormat(format);
+-  actor->mAllocBytes = aSize.width * aSize.height * bpp;
++  actor->mAllocBytes = aSize.width * aSize.height * (bpp == -1 ? 1.5 : bpp);
+   sCurrentAlloc += actor->mAllocBytes;
+ 
+   actor->mGraphicBuffer = buffer;
+diff --git a/media/webrtc/signaling/src/mediapipeline/MediaPipeline.cpp b/media/webrtc/signaling/src/mediapipeline/MediaPipeline.cpp
+index 1279cc0..a03a3f2 100644
+--- a/media/webrtc/signaling/src/mediapipeline/MediaPipeline.cpp
++++ b/media/webrtc/signaling/src/mediapipeline/MediaPipeline.cpp
+@@ -1105,8 +1105,8 @@ void MediaPipelineReceiveVideo::PipelineListener::RenderVideoFrame(
+ 
+   // Create a video frame and append it to the track.
+ #ifdef MOZ_WIDGET_GONK
+-  ImageFormat format = GRALLOC_PLANAR_YCBCR;
+-#else
++//  ImageFormat format = GRALLOC_PLANAR_YCBCR;
++//#else
+   ImageFormat format = PLANAR_YCBCR;
+ #endif
+   nsRefPtr<layers::Image> image = image_container_->CreateImage(&format, 1);
+-- 
+1.7.12.4 (Apple Git-37)
+
